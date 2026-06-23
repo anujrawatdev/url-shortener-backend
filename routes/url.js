@@ -18,9 +18,13 @@ router.post("/", async (req,res)=>{
     await URL.create({
         shortId : shortId,
         redirectURL : req.body.url,
+        createdBy:req.user._id,
     });
     
-    res.json({ shortID : shortId });
+    res.render("home",{
+        id:shortId,
+    });
+   
 })
 
 router.get("/", async(req,res)=>{
