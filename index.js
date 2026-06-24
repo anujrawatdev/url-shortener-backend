@@ -1,17 +1,22 @@
 const express = require('express');
 const app = express();
+
+const urlRoute = require("./routes/url.js");
+const port = 8001;
+
 const cookieParser = require("cookie-parser")
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 
+
 const path = require('path');
 const URL = require("./models/url");
 const staticRoute = require('./routes/staticRouter.js');
 const userRoute = require('./routes/user.js')
 const connectToMongoDb = require("./connection");
-const {restrictToLoggedinUserOnly ,checkAuth }= require('./middleware/auth');
+const {restrictTo ,checkForAuthentication }= require('./middleware/auth');
 
 
 connectToMongoDb("mongodb://127.0.0.1:27017/url-shortner")
@@ -28,14 +33,11 @@ app.get("/test",async(req , res)=>{
     });
 });
 
-const urlRoute = require("./routes/url.js");
-const port = 8001;
 
-
-
-app.use("/url", restrictToLoggedinUserOnly ,urlRoute);
+app.use(checkForAuthentication);
+app.use("/url" , restrictTo(["NORMAL"]) , urlRoute);
 app.use("/user",userRoute);
-app.use("/" , checkAuth ,staticRoute);
+app.use("/"  ,staticRoute);
 
 
 
